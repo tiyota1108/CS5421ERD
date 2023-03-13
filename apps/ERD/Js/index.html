@@ -64,7 +64,7 @@
         themePicker = new App.ThemePicker({ mainView: app });
         themePicker.render().$el.appendTo(document.body);
         window.addEventListener('load', function() {
-            app.graph.fromJSON(JSON.parse(App.config.sampleGraphs.emergencyProcedure));
+            app.graph.fromJSON(JSON.parse(App.config.sampleGraphs.erdSample));
         });
     </script>
 

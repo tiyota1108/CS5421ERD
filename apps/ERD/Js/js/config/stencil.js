@@ -21,10 +21,10 @@ App.config = App.config || {};
     App.config.stencil = {};
 
     App.config.stencil.groups = {
-        standard: { index: 1, label: 'Standard shapes' },
+        standard: { index: 4, label: 'Standard shapes' },
         fsa: { index: 2, label: 'State machine' },
         pn: { index: 3, label: 'Petri nets' },
-        erd: { index: 4, label: 'Entity-relationship' },
+        erd: { index: 1, label: 'Entity-relationship' },
         uml: { index: 5, label: 'UML' },
         org: { index: 6, label: 'ORG' }
     };
