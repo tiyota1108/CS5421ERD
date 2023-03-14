@@ -21,12 +21,12 @@ App.config = App.config || {};
     App.config.stencil = {};
 
     App.config.stencil.groups = {
-        standard: { index: 4, label: 'Standard shapes' },
-        fsa: { index: 2, label: 'State machine' },
-        pn: { index: 3, label: 'Petri nets' },
+        // standard: { index: 4, label: 'Standard shapes' },
+        // fsa: { index: 2, label: 'State machine' },
+        // pn: { index: 3, label: 'Petri nets' },
         erd: { index: 1, label: 'Entity-relationship' },
-        uml: { index: 5, label: 'UML' },
-        org: { index: 6, label: 'ORG' }
+        // uml: { index: 5, label: 'UML' },
+        // org: { index: 6, label: 'ORG' }
     };
 
     App.config.stencil.shapes = {};
@@ -525,38 +525,38 @@ App.config = App.config || {};
                 }
             }
         },
-        {
-            type: 'erd.WeakEntity',
-            size: { width: 90, height: 36 },
-            attrs: {
-                root: {
-                    dataTooltip: 'Weak Entity',
-                    dataTooltipPosition: 'left',
-                    dataTooltipPositionSelector: '.joint-stencil'
-                },
-                '.outer': {
-                    fill: 'transparent',
-                    stroke: '#feb663',
-                    'stroke-width': 2,
-                    points: '100,0 100,60 0,60 0,0',
-                    'stroke-dasharray': '0'
-                },
-                '.inner': {
-                    fill: '#feb663',
-                    stroke: 'transparent',
-                    points: '97,5 97,55 3,55 3,5',
-                    'stroke-dasharray': '0'
-                },
-                text: {
-                    text: 'Weak entity',
-                    'font-size': 11,
-                    'font-family': 'Roboto Condensed',
-                    'font-weight': 'Normal',
-                    fill: '#f6f6f6',
-                    'stroke-width': 0
-                }
-            }
-        },
+        // {
+        //     type: 'erd.WeakEntity',
+        //     size: { width: 90, height: 36 },
+        //     attrs: {
+        //         root: {
+        //             dataTooltip: 'Weak Entity',
+        //             dataTooltipPosition: 'left',
+        //             dataTooltipPositionSelector: '.joint-stencil'
+        //         },
+        //         '.outer': {
+        //             fill: 'transparent',
+        //             stroke: '#feb663',
+        //             'stroke-width': 2,
+        //             points: '100,0 100,60 0,60 0,0',
+        //             'stroke-dasharray': '0'
+        //         },
+        //         '.inner': {
+        //             fill: '#feb663',
+        //             stroke: 'transparent',
+        //             points: '97,5 97,55 3,55 3,5',
+        //             'stroke-dasharray': '0'
+        //         },
+        //         text: {
+        //             text: 'Weak entity',
+        //             'font-size': 11,
+        //             'font-family': 'Roboto Condensed',
+        //             'font-weight': 'Normal',
+        //             fill: '#f6f6f6',
+        //             'stroke-width': 0
+        //         }
+        //     }
+        // },
         {
             type: 'erd.Relationship',
             size: { width: 60, height: 60 },
@@ -582,62 +582,62 @@ App.config = App.config || {};
                 }
             }
         },
-        {
-            type: 'erd.IdentifyingRelationship',
-            size: { width: 60, height: 60 },
-            attrs: {
-                root: {
-                    dataTooltip: 'Identifying Relationship',
-                    dataTooltipPosition: 'left',
-                    dataTooltipPositionSelector: '.joint-stencil'
-                },
-                '.outer': {
-                    fill: 'transparent',
-                    stroke: '#6a6c8a',
-                    'stroke-dasharray': '0'
-                },
-                '.inner': {
-                    fill: '#6a6c8a',
-                    stroke: 'transparent',
-                    'stroke-dasharray': '0'
-                },
-                text: {
-                    text: 'Relation',
-                    'font-size': 11,
-                    'font-family': 'Roboto Condensed',
-                    'font-weight': 'Normal',
-                    fill: '#f6f6f6',
-                    'stroke-width': 0
-                }
-            }
-        },
-        {
-            type: 'erd.ISA',
-            size: { width: 90, height: 45 },
-            attrs: {
-                root: {
-                    dataTooltip: 'ISA',
-                    dataTooltipPosition: 'left',
-                    dataTooltipPositionSelector: '.joint-stencil'
-                },
-                text: {
-                    text: 'ISA',
-                    fill: '#f6f6f6',
-                    'letter-spacing': 0,
-                    'font-family': 'Roboto Condensed',
-                    'font-weight': 'Normal',
-                    'font-size': 11
-                },
-                polygon: {
-                    fill: '#feb663',
-                    stroke: 'transparent',
-                    'stroke-dasharray': '0'
-                }
-            }
-        },
+        // {
+        //     type: 'erd.IdentifyingRelationship',
+        //     size: { width: 60, height: 60 },
+        //     attrs: {
+        //         root: {
+        //             dataTooltip: 'Identifying Relationship',
+        //             dataTooltipPosition: 'left',
+        //             dataTooltipPositionSelector: '.joint-stencil'
+        //         },
+        //         '.outer': {
+        //             fill: 'transparent',
+        //             stroke: '#6a6c8a',
+        //             'stroke-dasharray': '0'
+        //         },
+        //         '.inner': {
+        //             fill: '#6a6c8a',
+        //             stroke: 'transparent',
+        //             'stroke-dasharray': '0'
+        //         },
+        //         text: {
+        //             text: 'Relation',
+        //             'font-size': 11,
+        //             'font-family': 'Roboto Condensed',
+        //             'font-weight': 'Normal',
+        //             fill: '#f6f6f6',
+        //             'stroke-width': 0
+        //         }
+        //     }
+        // },
+        // {
+        //     type: 'erd.ISA',
+        //     size: { width: 90, height: 45 },
+        //     attrs: {
+        //         root: {
+        //             dataTooltip: 'ISA',
+        //             dataTooltipPosition: 'left',
+        //             dataTooltipPositionSelector: '.joint-stencil'
+        //         },
+        //         text: {
+        //             text: 'ISA',
+        //             fill: '#f6f6f6',
+        //             'letter-spacing': 0,
+        //             'font-family': 'Roboto Condensed',
+        //             'font-weight': 'Normal',
+        //             'font-size': 11
+        //         },
+        //         polygon: {
+        //             fill: '#feb663',
+        //             stroke: 'transparent',
+        //             'stroke-dasharray': '0'
+        //         }
+        //     }
+        // },
         {
             type: 'erd.Key',
-            size: { width: 90, height: 45 },
+            size: { width: 45, height: 45 },
             attrs: {
                 root: {
                     dataTooltip: 'Key',
@@ -645,14 +645,8 @@ App.config = App.config || {};
                     dataTooltipPositionSelector: '.joint-stencil'
                 },
                 '.outer': {
-                    fill: 'transparent',
-                    stroke: '#fe854f',
-                    'stroke-dasharray': '0'
-                },
-                '.inner': {
                     fill: '#fe854f',
                     stroke: 'transparent',
-                    display: 'block',
                     'stroke-dasharray': '0'
                 },
                 text: {
@@ -666,11 +660,11 @@ App.config = App.config || {};
             }
         },
         {
-            type: 'erd.Normal',
-            size: { width: 90, height: 45 },
+            type: 'erd.Attribute',
+            size: { width: 45, height: 45 },
             attrs: {
                 root: {
-                    dataTooltip: 'Normal',
+                    dataTooltip: 'Attribute',
                     dataTooltipPosition: 'left',
                     dataTooltipPositionSelector: '.joint-stencil'
                 },
@@ -680,7 +674,7 @@ App.config = App.config || {};
                     'stroke-dasharray': '0'
                 },
                 text: {
-                    text: 'Normal',
+                    text: 'Attribute',
                     'font-size': 11,
                     'font-family': 'Roboto Condensed',
                     'font-weight': 'Normal',
@@ -689,67 +683,67 @@ App.config = App.config || {};
                 }
             }
         },
-        {
-            type: 'erd.Multivalued',
-            size: { width: 90, height: 45 },
-            attrs: {
-                root: {
-                    dataTooltip: 'Mutltivalued',
-                    dataTooltipPosition: 'left',
-                    dataTooltipPositionSelector: '.joint-stencil'
-                },
-                '.outer': {
-                    fill: 'transparent',
-                    stroke: '#fe854f',
-                    'stroke-dasharray': '0'
-                },
-                '.inner': {
-                    fill: '#fe854f',
-                    stroke: 'transparent',
-                    rx: 43,
-                    ry: 21,
-                    'stroke-dasharray': '0'
-                },
-                text: {
-                    text: 'MultiValued',
-                    'font-size': 11,
-                    'font-family': 'Roboto Condensed',
-                    'font-weight': 'Normal',
-                    fill: '#f6f6f6',
-                    'stroke-width': 0
-                }
-            }
-        },
-        {
-            type: 'erd.Derived',
-            size: { width: 90, height: 45 },
-            attrs: {
-                root: {
-                    dataTooltip: 'Derived',
-                    dataTooltipPosition: 'left',
-                    dataTooltipPositionSelector: '.joint-stencil'
-                },
-                '.outer': {
-                    fill: 'transparent',
-                    stroke: '#fe854f',
-                    'stroke-dasharray': '0'
-                },
-                '.inner': {
-                    fill: '#feb663',
-                    stroke: 'transparent',
-                    'display': 'block',
-                    'stroke-dasharray': '0'
-                },
-                text: {
-                    text: 'Derived',
-                    fill: '#f6f6f6',
-                    'font-family': 'Roboto Condensed',
-                    'font-weight': 'Normal',
-                    'font-size': 11,
-                    'stroke-width': 0
-                }
-            }
-        }
+        // {
+        //     type: 'erd.Multivalued',
+        //     size: { width: 90, height: 45 },
+        //     attrs: {
+        //         root: {
+        //             dataTooltip: 'Mutltivalued',
+        //             dataTooltipPosition: 'left',
+        //             dataTooltipPositionSelector: '.joint-stencil'
+        //         },
+        //         '.outer': {
+        //             fill: 'transparent',
+        //             stroke: '#fe854f',
+        //             'stroke-dasharray': '0'
+        //         },
+        //         '.inner': {
+        //             fill: '#fe854f',
+        //             stroke: 'transparent',
+        //             rx: 43,
+        //             ry: 21,
+        //             'stroke-dasharray': '0'
+        //         },
+        //         text: {
+        //             text: 'MultiValued',
+        //             'font-size': 11,
+        //             'font-family': 'Roboto Condensed',
+        //             'font-weight': 'Normal',
+        //             fill: '#f6f6f6',
+        //             'stroke-width': 0
+        //         }
+        //     }
+        // },
+        // {
+        //     type: 'erd.Derived',
+        //     size: { width: 90, height: 45 },
+        //     attrs: {
+        //         root: {
+        //             dataTooltip: 'Derived',
+        //             dataTooltipPosition: 'left',
+        //             dataTooltipPositionSelector: '.joint-stencil'
+        //         },
+        //         '.outer': {
+        //             fill: 'transparent',
+        //             stroke: '#fe854f',
+        //             'stroke-dasharray': '0'
+        //         },
+        //         '.inner': {
+        //             fill: '#feb663',
+        //             stroke: 'transparent',
+        //             'display': 'block',
+        //             'stroke-dasharray': '0'
+        //         },
+        //         text: {
+        //             text: 'Derived',
+        //             fill: '#f6f6f6',
+        //             'font-family': 'Roboto Condensed',
+        //             'font-weight': 'Normal',
+        //             'font-size': 11,
+        //             'stroke-width': 0
+        //         }
+        //     }
+        // }
     ];
 
     App.config.stencil.shapes.uml = [
