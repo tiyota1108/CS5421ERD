@@ -108,6 +108,11 @@ var App = window.App || {};
                 const zoom = paperScroller.zoom();
                 paperScroller.zoom(zoom * scale, { min: 0.2, max: 5, ox, oy, absolute: true });
             });
+
+            graph.on('change add remove', () => {
+                const diagramJSONString = JSON.stringify(graph.toJSON());
+                console.log('Diagram JSON', diagramJSONString);
+            });
         },
 
         // Create and populate stencil.
