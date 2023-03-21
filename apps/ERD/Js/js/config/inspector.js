@@ -2762,7 +2762,7 @@ App.config = App.config || {};
                 }
             }
         },
-        'erd.Normal': {
+        'erd.Attribute': {
             inputs: {
                 attrs: {
                     text: {
