@@ -2762,13 +2762,13 @@ App.config = App.config || {};
                 }
             }
         },
-        'erd.Normal': {
+        'erd.Attribute': {
             inputs: {
                 attrs: {
                     text: {
                         text: {
                             type: 'content-editable',
-                            label: 'Text',
+                            label: 'Attribute',
                             group: 'text',
                             index: 1
                         },
@@ -2803,6 +2803,47 @@ App.config = App.config || {};
                             label: 'Fill',
                             group: 'text',
                             when: { ne: { 'attrs/text/text': '' }},
+                            index: 5
+                        }
+                    },
+                    '.textlabel': {
+                        text: {
+                            type: 'content-editable',
+                            label: 'Datatype',
+                            group: 'text',
+                            index: 1
+                        },
+                        'font-size': {
+                            type: 'range',
+                            min: 5,
+                            max: 80,
+                            unit: 'px',
+                            label: 'Font size datatype',
+                            group: 'text',
+                            when: { ne: { 'attrs/.textlabel/text': '' }},
+                            index: 2
+                        },
+                        'font-family': {
+                            type: 'select-box',
+                            options: options.fontFamily,
+                            label: 'Font family datatype',
+                            group: 'text',
+                            index: 3
+                        },
+                        'font-weight': {
+                            type: 'select-box',
+                            options: options.fontWeight,
+                            label: 'Font thickness datatype',
+                            group: 'text',
+                            when: { ne: { 'attrs/.textlabel/text': '' }},
+                            index: 4
+                        },
+                        fill: {
+                            type: 'color-palette',
+                            options: options.colorPalette,
+                            label: 'Fill datatype',
+                            group: 'text',
+                            when: { ne: { 'attrs/.textlabel/text': '' }},
                             index: 5
                         }
                     },
@@ -2857,6 +2898,10 @@ App.config = App.config || {};
                 text: {
                     label: 'Text',
                     index: 2
+                },
+                textlabel:{
+                    label: 'Datatype',
+                    index: 3
                 }
             }
         },

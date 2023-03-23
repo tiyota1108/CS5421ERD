@@ -525,38 +525,38 @@ App.config = App.config || {};
                 }
             }
         },
-        // {
-        //     type: 'erd.WeakEntity',
-        //     size: { width: 90, height: 36 },
-        //     attrs: {
-        //         root: {
-        //             dataTooltip: 'Weak Entity',
-        //             dataTooltipPosition: 'left',
-        //             dataTooltipPositionSelector: '.joint-stencil'
-        //         },
-        //         '.outer': {
-        //             fill: 'transparent',
-        //             stroke: '#feb663',
-        //             'stroke-width': 2,
-        //             points: '100,0 100,60 0,60 0,0',
-        //             'stroke-dasharray': '0'
-        //         },
-        //         '.inner': {
-        //             fill: '#feb663',
-        //             stroke: 'transparent',
-        //             points: '97,5 97,55 3,55 3,5',
-        //             'stroke-dasharray': '0'
-        //         },
-        //         text: {
-        //             text: 'Weak entity',
-        //             'font-size': 11,
-        //             'font-family': 'Roboto Condensed',
-        //             'font-weight': 'Normal',
-        //             fill: '#f6f6f6',
-        //             'stroke-width': 0
-        //         }
-        //     }
-        // },
+        {
+            type: 'erd.WeakEntity',
+            size: { width: 90, height: 36 },
+            attrs: {
+                root: {
+                    dataTooltip: 'Weak Entity',
+                    dataTooltipPosition: 'left',
+                    dataTooltipPositionSelector: '.joint-stencil'
+                },
+                '.outer': {
+                    fill: 'transparent',
+                    stroke: '#feb663',
+                    'stroke-width': 2,
+                    points: '100,0 100,60 0,60 0,0',
+                    'stroke-dasharray': '0'
+                },
+                '.inner': {
+                    fill: '#feb663',
+                    stroke: 'transparent',
+                    points: '97,5 97,55 3,55 3,5',
+                    'stroke-dasharray': '0'
+                },
+                text: {
+                    text: 'Weak entity',
+                    'font-size': 11,
+                    'font-family': 'Roboto Condensed',
+                    'font-weight': 'Normal',
+                    fill: '#f6f6f6',
+                    'stroke-width': 0
+                }
+            }
+        },
         {
             type: 'erd.Relationship',
             size: { width: 60, height: 60 },
@@ -582,35 +582,35 @@ App.config = App.config || {};
                 }
             }
         },
-        // {
-        //     type: 'erd.IdentifyingRelationship',
-        //     size: { width: 60, height: 60 },
-        //     attrs: {
-        //         root: {
-        //             dataTooltip: 'Identifying Relationship',
-        //             dataTooltipPosition: 'left',
-        //             dataTooltipPositionSelector: '.joint-stencil'
-        //         },
-        //         '.outer': {
-        //             fill: 'transparent',
-        //             stroke: '#6a6c8a',
-        //             'stroke-dasharray': '0'
-        //         },
-        //         '.inner': {
-        //             fill: '#6a6c8a',
-        //             stroke: 'transparent',
-        //             'stroke-dasharray': '0'
-        //         },
-        //         text: {
-        //             text: 'Relation',
-        //             'font-size': 11,
-        //             'font-family': 'Roboto Condensed',
-        //             'font-weight': 'Normal',
-        //             fill: '#f6f6f6',
-        //             'stroke-width': 0
-        //         }
-        //     }
-        // },
+        {
+            type: 'erd.IdentifyingRelationship',
+            size: { width: 60, height: 60 },
+            attrs: {
+                root: {
+                    dataTooltip: 'Identifying Relationship',
+                    dataTooltipPosition: 'left',
+                    dataTooltipPositionSelector: '.joint-stencil'
+                },
+                '.outer': {
+                    fill: 'transparent',
+                    stroke: '#6a6c8a',
+                    'stroke-dasharray': '0'
+                },
+                '.inner': {
+                    fill: '#6a6c8a',
+                    stroke: 'transparent',
+                    'stroke-dasharray': '0'
+                },
+                text: {
+                    text: 'Relation',
+                    'font-size': 11,
+                    'font-family': 'Roboto Condensed',
+                    'font-weight': 'Normal',
+                    fill: '#f6f6f6',
+                    'stroke-width': 0
+                }
+            }
+        },
         // {
         //     type: 'erd.ISA',
         //     size: { width: 90, height: 45 },
@@ -671,17 +671,34 @@ App.config = App.config || {};
                 '.outer': {
                     fill: '#feb663',
                     stroke: 'transparent',
-                    'stroke-dasharray': '0'
+                    'stroke-dasharray': '0',
+                    z:1
                 },
+                
                 text: {
                     text: 'Attribute',
                     'font-size': 11,
                     'font-family': 'Roboto Condensed',
                     'font-weight': 'Normal',
+                    'ref-y': 0.3,
                     fill: '#f6f6f6',
-                    'stroke-width': 0
+                    'stroke-width': 0,
+                    z:2
+                },
+                
+                '.textlabel': {
+                    text: 'Datatype',
+                    'font-size': 9,
+                    'font-family': 'Roboto Condensed',
+                    'font-weight': 'Normal',
+                    'ref-y': 0.7,
+                    'ref-x': 0.5,
+                    fill: '#000000',
+                    'stroke-width': 0,
+                    z:2
                 }
-            }
+            },
+            markup: '<g class="rotatable"><g class="scalable"><ellipse class="outer"/><text class="label"/><text class="textlabel"/></g></g>'
         },
         // {
         //     type: 'erd.Multivalued',
