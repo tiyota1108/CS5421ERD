@@ -75,8 +75,9 @@ function generatePostgreSqlDdl(jsonObj) {
     // Step 2: Loop through links
     const entityToAttribute = new Map() // structure: {"entity_id": set({id: "attribute_id", link: "link_id"})}
     const entityToKey = new Map() // structure: {"entity_id": set("key_id")}
-    const keyToAttribute = new Map() // structure: {"key_id": {id: "attribute_id", value: "label_text"}}
+    const keyToAttribute = new Map() // structure: {"key_id": {id: "attribute_id", link: "link_id"}}
     const relationshipToAttribute = new Map() // structure: {"relationship_id": set({id: "attribute_id", link: "link_id"})}
+    const relationshipToEntity = new Map() // structure: {"relationship_id": set(id: "entity_id", link: "link_id")}
     for (let i = 0; i < jsonObj.cells.length; i++) {
         if (jsonObj.cells[i].type === 'app.Link') {
             // Case 1: Entity to Attribute link
@@ -96,17 +97,15 @@ function generatePostgreSqlDdl(jsonObj) {
 
             // Case 2: Entity to Key link
             if (entities.has(jsonObj.cells[i].source.id) && keys.has(jsonObj.cells[i].target.id)) {
-                let newEntry = {id: jsonObj.cells[i].target.id, link: jsonObj.cells[i].id}
                 entityToKey.set(jsonObj.cells[i].source.id,
                     entityToKey.has(jsonObj.cells[i].source.id) ?
-                        entityToKey.get(jsonObj.cells[i].source.id).add(newEntry) :
-                        new Set([newEntry]))
+                        entityToKey.get(jsonObj.cells[i].source.id).add(jsonObj.cells[i].target.id) :
+                        new Set([jsonObj.cells[i].target.id]))
             } else if (entities.has(jsonObj.cells[i].target.id) && keys.has(jsonObj.cells[i].source.id)) {
-                let newEntry = {id: jsonObj.cells[i].source.id, link: jsonObj.cells[i].id}
                 entityToKey.set(jsonObj.cells[i].target.id,
                     entityToKey.has(jsonObj.cells[i].target.id) ?
-                        entityToKey.get(jsonObj.cells[i].target.id).add(newEntry) :
-                        new Set([newEntry]))
+                        entityToKey.get(jsonObj.cells[i].target.id).add(jsonObj.cells[i].source.id) :
+                        new Set([jsonObj.cells[i].source.id]))
             }
 
             // Case 3: Key to Attribute link
@@ -138,32 +137,51 @@ function generatePostgreSqlDdl(jsonObj) {
                         relationshipToAttribute.get(jsonObj.cells[i].target.id).add(newEntry) :
                         new Set([newEntry]))
             }
+
+            // Case 5: Relationship to Entity link
+            if (relationships.has(jsonObj.cells[i].source.id) && entities.has(jsonObj.cells[i].target.id)) {
+                let newEntry = {id: jsonObj.cells[i].target.id, link: jsonObj.cells[i].id}
+                relationshipToEntity.set(jsonObj.cells[i].source.id,
+                    relationshipToEntity.has(jsonObj.cells[i].source.id) ?
+                        relationshipToEntity.get(jsonObj.cells[i].source.id).add(newEntry) :
+                        new Set([newEntry]))
+            } else if (relationships.has(jsonObj.cells[i].target.id) && entities.has(jsonObj.cells[i].source.id)) {
+                let newEntry = {id: jsonObj.cells[i].source.id, link: jsonObj.cells[i].id}
+                relationshipToEntity.set(jsonObj.cells[i].target.id,
+                    relationshipToEntity.has(jsonObj.cells[i].target.id) ?
+                        relationshipToEntity.get(jsonObj.cells[i].target.id).add(newEntry) :
+                        new Set([newEntry]))
+            }
         }
     }
 
     // Step 3: Fill in ddl
     let res = ""
+    let entityPrimaryKeys = new Map()
+    let entityPrimaryKeysWithType = new Map()
     for (let [key, values] of entityToKey) {
         let ddlForCurrEntity = ("CREATE TABLE " + entities.get(key) + " (\n")
         let currKeys = []
+        let currKeysWithType = []
         const currEntityKeys = Array.from(values)
         for (let i = 0; i < currEntityKeys.length; i++) {
-            if (!keyToAttribute.has(currEntityKeys[i].id)) {
+            if (!keyToAttribute.has(currEntityKeys[i])) {
                 console.log("[Graph validation error] Got key unconnected to attribute")
             }
-            let linkId = keyToAttribute.get(currEntityKeys[i].id).link
+            let linkId = keyToAttribute.get(currEntityKeys[i]).link
             if (!links.has(linkId) || links.get(linkId).length === 0) {
                 console.log("[Graph validation error] Got key to attribute connection without data type specified")
             }
-            let attributeName = attributes.get(keyToAttribute.get(currEntityKeys[i].id).id)
+            let attributeName = attributes.get(keyToAttribute.get(currEntityKeys[i]).id)
             let linkWords = links.get(linkId).join(" ")
             ddlForCurrEntity += ("\t" + attributeName + " " + linkWords + ", \n");
             currKeys.push(attributeName)
+            currKeysWithType.push(attributeName + " " + linkWords)
         }
 
         const currEntityAttributes = Array.from(entityToAttribute.get(key))
         for (let i = 0; i < currEntityAttributes.length; i++) {
-            if (!links.has(currEntityAttributes[i].link) || links.get(currEntityAttributes[i].link) === 0) {
+            if (!links.has(currEntityAttributes[i].link) || links.get(currEntityAttributes[i].link).length === 0) {
                 console.log("[Graph validation error] Got entity to attribute connection without data type specified")
             }
             let attributeName = attributes.get(currEntityAttributes[i].id)
@@ -171,13 +189,28 @@ function generatePostgreSqlDdl(jsonObj) {
             ddlForCurrEntity += ("\t" + attributeName + " " + linkWords + ", \n")
         }
 
+        entityPrimaryKeys.set(key, currKeys)
+        entityPrimaryKeysWithType.set(key, currKeysWithType)
         ddlForCurrEntity += ("\tPRIMARY KEY (" + currKeys.join(",") + ")\n)\n")
         res += ddlForCurrEntity
     }
 
-    for (let [key, values] of relationshipToAttribute) {
+    for (let [key, values] of relationshipToEntity) {
         let ddlForCurrRelationship = ("CREATE TABLE " + relationships.get(key) + " (\n")
-        const currRelationshipAttributes = Array.from(values)
+        let currKeys = []
+
+        const currRelationshipKeys = Array.from(values)
+        for (let i = 0; i < currRelationshipKeys.length; i++) {
+            let linkId = currRelationshipKeys[i].link
+            if (!links.has(linkId) || links.get(linkId).length !== 1) {
+                console.log("[Graph validation error] Got relationship to entity connection without/multiple cardinality specified")
+            }
+            // TODO: it seems that the cardinality does not affect the relationship primary keys
+            ddlForCurrRelationship += ("\t" + entityPrimaryKeysWithType.get(currRelationshipKeys[i].id) + ", \n")
+            currKeys.push(entityPrimaryKeys.get(currRelationshipKeys[i].id))
+        }
+
+        const currRelationshipAttributes = Array.from(relationshipToAttribute.get(key))
         for (let i = 0; i < currRelationshipAttributes.length; i++) {
             if (!links.has(currRelationshipAttributes[i].link) || links.get(currRelationshipAttributes[i].link) === 0) {
                 console.log("[Graph validation error] Got relationship to attribute connection without data type specified")
@@ -187,7 +220,7 @@ function generatePostgreSqlDdl(jsonObj) {
             ddlForCurrRelationship += ("\t" + attributeName + " " + linkWords + ", \n")
         }
 
-        ddlForCurrRelationship += ("\tPRIMARY KEY (" + "TODO" + ")\n)\n")
+        ddlForCurrRelationship += ("\tPRIMARY KEY (" + currKeys.join(",") + ")\n)\n")
         res += ddlForCurrRelationship
     }
 
