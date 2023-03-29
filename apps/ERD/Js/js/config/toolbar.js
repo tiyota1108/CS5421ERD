@@ -99,6 +99,20 @@ App.config = App.config || {};
             },
             {
                 type: 'button',
+                name: 'png',
+                group: 'export',
+                text: 'Generate DDL',
+                attrs: {
+                    button: {
+                        id: 'btn-png',
+                        'data-tooltip': 'Open a Print Dialog',
+                        'data-tooltip-position': 'top',
+                        'data-tooltip-position-selector': '.toolbar-container'
+                    }
+                }
+            },
+            {
+                type: 'button',
                 name: 'print',
                 group: 'print',
                 attrs: {
