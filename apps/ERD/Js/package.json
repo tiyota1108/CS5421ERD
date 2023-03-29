@@ -7,5 +7,9 @@
   "author": "client IO",
   "license": "http://jointjs.com/license/rappid",
   "private": true,
-  "devDependencies": {}
+  "module": "rappid.mjs",
+  "type": "module",
+  "dependencies": {
+    "xml-js": "^1.6.11"
+  }
 }
