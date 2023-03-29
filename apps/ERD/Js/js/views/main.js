@@ -509,6 +509,7 @@ var App = window.App || {};
                 'snapline:change': this.changeSnapLines.bind(this),
                 'clear:pointerclick': this.graph.clear.bind(this.graph),
                 'print:pointerclick': this.paper.print.bind(this.paper),
+                'generateddl:pointerclick': this.generateDDL.bind(this),
                 'grid-size:change': this.paper.setGridSize.bind(this.paper)
             });
 
@@ -578,6 +579,24 @@ var App = window.App || {};
                 useComputedStyles: false,
                 stylesheet: this.exportStylesheet
             });
+        },
+
+        generateDDL: function() {
+        var windowFeatures = 'menubar=no,location=no,resizable=yes,scrollbars=yes,status=no';
+        var windowName = _.uniqueId('ddl_output');
+        var jsonWindow = window.open('', windowName, windowFeatures);
+        const jsonObj = JSON.stringify(this.graph.toJSON());
+        if (jsonWindow) {
+
+            if (validateGraph(this.graph.toJSON())){
+                jsonWindow.document.write('<textarea rows="50" cols="100" style="resize: true;">' + generatePostgreSqlDdl(this.graph.toJSON()) + '</textarea>');
+                jsonWindow.focus();
+            }
+            else{
+                jsonWindow.document.write('Error encountered when generating ddl, check console log for more details. JSON:',jsonObj);
+            };
+            
+        }
         },
 
         layoutDirectedGraph: function() {
