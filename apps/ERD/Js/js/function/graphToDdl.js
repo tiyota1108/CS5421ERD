@@ -167,11 +167,11 @@ function generatePostgreSqlDdl(jsonObj) {
         }
     }
 
-    let res = ""
-
     // Step 4: Fill in ddl for entity
     let entityPrimaryKeys = new Map()
     let entityPrimaryKeysWithType = new Map()
+    let entityAttributesWithType = new Map()
+    let entitySql = new Map()
     let entitiesQueue = Array.from(entityToKey.keys())
     while (entitiesQueue.length !== 0) {
         const key = entitiesQueue[0]
@@ -181,6 +181,7 @@ function generatePostgreSqlDdl(jsonObj) {
         let ddlForCurrEntity = ("CREATE TABLE " + entities.get(key) + " (\n")
         let currKeys = []
         let currKeysWithType = []
+        let currAttributesWithType = []
         let currForeignKeys = []
 
         if (weakEntity.has(key)) {
@@ -250,11 +251,13 @@ function generatePostgreSqlDdl(jsonObj) {
                 let attributeName = attributes.get(currEntityAttributes[i].id)
                 let linkWords = links.get(currEntityAttributes[i].link).join(" ")
                 ddlForCurrEntity += ("\t" + attributeName + " " + linkWords + ", \n")
+                currAttributesWithType.push(attributeName + " " + linkWords)
             }
         }
 
         entityPrimaryKeys.set(key, currKeys)
         entityPrimaryKeysWithType.set(key, currKeysWithType)
+        entityAttributesWithType.set(key, currAttributesWithType)
         ddlForCurrEntity += ("\tPRIMARY KEY (" + currKeys.join(",") + ")")
 
         if (currForeignKeys.length > 0) {
@@ -269,24 +272,26 @@ function generatePostgreSqlDdl(jsonObj) {
         }
         ddlForCurrEntity += "\n)\n"
 
-        res += ddlForCurrEntity
+        entitySql.set(key, ddlForCurrEntity)
     }
 
     // Step 5: Fill in ddl for relationship
     // TODO: Test case for unary
+    let relationshipSql = new Map()
+    let outputEntitySql = entitySql
     for (let [key, values] of relationshipToEntity) {
         let ddlForCurrRelationship = ("CREATE TABLE " + relationships.get(key) + " (\n")
         let currKeys = []
         let currForeignKeys = []
+        let hasOwnPrimaryKey = false
 
         if (relationshipToKey.get(key) !== undefined) {
-            const currRelationshipKeys = relationshipToKey.get(key)
+            const currRelationshipKeys = Array.from(relationshipToKey.get(key))
+            const weakEntityIds = []
             for (let i = 0; i < currRelationshipKeys.length; i++) {
-                if (!keyToAttribute.has(currRelationshipKeys[i]) && !keyToEntity.has(currRelationshipKeys[i])) {
-                    throw new Error("[Graph validation error] Got relationship -> key connection unconnected with either attribute or entity")
-                }
                 if (keyToAttribute.has(currRelationshipKeys[i])) {
-                    // Relationship key type 1: key -> attribute
+                    // relationship -> key -> attribute
+                    hasOwnPrimaryKey = true
                     let linkId = keyToAttribute.get(currRelationshipKeys[i]).link
                     if (!links.has(linkId) || links.get(linkId).length === 0) {
                         throw new Error("[Graph validation error] Got key to attribute connection without data type specified")
@@ -295,11 +300,50 @@ function generatePostgreSqlDdl(jsonObj) {
                     let linkWords = links.get(linkId).join(" ")
                     ddlForCurrRelationship += ("\t" + attributeName + " " + linkWords + ", \n");
                     currKeys.push(attributeName)
+                } else if (keyToEntity.has(currRelationshipKeys[i])) {
+                    // relationship -> key -> entity
+                    weakEntityIds.push(keyToEntity.get(currRelationshipKeys[i]))
                 } else {
-                    // Relationship key type 2: relationship -> key -> entity
-                    ddlForCurrRelationship += ("\t" + entityPrimaryKeysWithType.get(keyToEntity.get(currRelationshipKeys[i]).id) + ", \n")
-                    currKeys.push(entityPrimaryKeys.get(keyToEntity.get(currRelationshipKeys[i]).id))
+                    throw new Error("[Graph validation error] Got relationship -> key connection unconnected with either attribute or entity")
                 }
+            }
+            if (weakEntityIds.length !== 0 && values.size !== 0) {
+                // [Optimization 3] Relationship contains normal entities and weak entities
+                let sqlLines = new Set() // this can de-duplicate the duplicate primary keys
+                let tables = []
+                let tableName = ""
+                for (let i = 0; i < weakEntityIds.length; i++) {
+                    let weakEntityId = weakEntityIds[i]
+                    let weakEntitySqlSplit = entitySql.get(weakEntityId).split('\n')
+                    weakEntitySqlSplit.slice(1, weakEntitySqlSplit.length-2).forEach(line => {
+                        line = line.trim()
+                        line = line.replace(",", "")
+                        sqlLines.add(line)
+                    })
+                    tables.push(entities.get(weakEntityId))
+                    outputEntitySql.delete(weakEntityId)
+                }
+
+                tableName = tables.join("_") + "_" + relationships.get(key) + "_"
+
+                let dependentEntityIds = Array.from(values)
+                tables = []
+                for (let i = 0; i < dependentEntityIds.length; i++) {
+                    let dependentEntityId = dependentEntityIds[i].id
+                    sqlLines.add(entityAttributesWithType.get(dependentEntityId))
+                    tables.push(entities.get(dependentEntityId))
+                    outputEntitySql.delete(dependentEntityId)
+                }
+
+                tableName += tables.join("_")
+
+                ddlForCurrRelationship = ("CREATE TABLE " + tableName + " (\n\t")
+                ddlForCurrRelationship += Array.from(sqlLines).join(",\n\t")
+                ddlForCurrRelationship = ddlForCurrRelationship.trim()
+                ddlForCurrRelationship = ddlForCurrRelationship.substring(0, ddlForCurrRelationship.length-1)
+                ddlForCurrRelationship += "\n)\n"
+                relationshipSql.set(key, ddlForCurrRelationship)
+                continue
             }
         }
 
@@ -344,9 +388,17 @@ function generatePostgreSqlDdl(jsonObj) {
         }
         ddlForCurrRelationship += "\n)\n"
 
-        res += ddlForCurrRelationship
+        relationshipSql.set(key, ddlForCurrRelationship)
     }
 
+    // Step 6: Join necessary sql together
+    let res = ""
+    for (let [_, sql] of outputEntitySql) {
+        res += sql
+    }
+    for (let [_, sql] of relationshipSql) {
+        res += sql
+    }
     return res
 }
 
