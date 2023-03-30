@@ -510,6 +510,7 @@ var App = window.App || {};
                 'clear:pointerclick': this.graph.clear.bind(this.graph),
                 'print:pointerclick': this.paper.print.bind(this.paper),
                 'generateddl:pointerclick': this.generateDDL.bind(this),
+                'generateprestoddl:pointerclick': this.generateprestoDDL.bind(this),
                 'grid-size:change': this.paper.setGridSize.bind(this.paper)
             });
 
@@ -588,6 +589,21 @@ var App = window.App || {};
             if (jsonWindow) {
                 try {
                     var result = generateSqlDdl(this.graph.toJSON(), 'mysql')
+                    jsonWindow.document.write('<textarea rows="50" cols="100" style="resize: true;">' + result + '</textarea>');
+                    jsonWindow.focus();
+                } catch (e) {
+                    jsonWindow.document.write('Error encountered when generating ddl. Details:\n', e);
+                }
+            }
+        },
+
+        generateprestoDDL: function() {
+            var windowFeatures = 'menubar=no,location=no,resizable=yes,scrollbars=yes,status=no';
+            var windowName = _.uniqueId('ddl_output');
+            var jsonWindow = window.open('', windowName, windowFeatures);
+            if (jsonWindow) {
+                try {
+                    var result = generatePostgreSqlDdl(this.graph.toJSON(), 'mysql')
                     jsonWindow.document.write('<textarea rows="50" cols="100" style="resize: true;">' + result + '</textarea>');
                     jsonWindow.focus();
                 } catch (e) {

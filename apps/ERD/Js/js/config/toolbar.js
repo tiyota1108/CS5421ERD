@@ -99,13 +99,27 @@ App.config = App.config || {};
             },
             {
                 type: 'button',
-                name: 'generateddl',
+                name: 'generateprestoddl',
                 group: 'export',
-                text: 'Generate DDL',
+                text: 'Generate DDL(presto)',
                 attrs: {
                     button: {
                         id: 'btn-ddl',
-                        'data-tooltip': 'Generate DDL in a pop-up',
+                        'data-tooltip': 'Generate Presto DDL in a pop-up',
+                        'data-tooltip-position': 'top',
+                        'data-tooltip-position-selector': '.toolbar-container'
+                    }
+                }
+            },
+            {
+                type: 'button',
+                name: 'generateddl',
+                group: 'export',
+                text: 'Generate DDL(mysql)',
+                attrs: {
+                    button: {
+                        id: 'btn-ddl',
+                        'data-tooltip': 'Generate MySql DDL in a pop-up',
                         'data-tooltip-position': 'top',
                         'data-tooltip-position-selector': '.toolbar-container'
                     }
