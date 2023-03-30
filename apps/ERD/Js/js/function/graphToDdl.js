@@ -278,7 +278,6 @@ function generatePostgreSqlDdl(jsonObj) {
     // Step 5: Fill in ddl for relationship
     // TODO: Test case for unary
     let relationshipSql = new Map()
-    let outputEntitySql = entitySql
     for (let [key, values] of relationshipToEntity) {
         let ddlForCurrRelationship = ("CREATE TABLE " + relationships.get(key) + " (\n")
         let currKeys = []
@@ -308,20 +307,18 @@ function generatePostgreSqlDdl(jsonObj) {
                 }
             }
             if (weakEntityIds.length !== 0 && values.size !== 0) {
-                // [Optimization 3] Relationship contains normal entities and weak entities
-                let sqlLines = new Set() // this can de-duplicate the duplicate primary keys
+                // [Optimization 3] Relationship contains normal entities and weak entities can be merged together
+                let fieldWithType = new Set() // this can de-duplicate the duplicate primary keys
+                let primaryKeys = new Set()
                 let tables = []
                 let tableName = ""
                 for (let i = 0; i < weakEntityIds.length; i++) {
                     let weakEntityId = weakEntityIds[i]
-                    let weakEntitySqlSplit = entitySql.get(weakEntityId).split('\n')
-                    weakEntitySqlSplit.slice(1, weakEntitySqlSplit.length-2).forEach(line => {
-                        line = line.trim()
-                        line = line.replace(",", "")
-                        sqlLines.add(line)
-                    })
+                    entityPrimaryKeysWithType.get(weakEntityId).forEach(val => fieldWithType.add(val))
+                    entityAttributesWithType.get(weakEntityId).forEach(val => fieldWithType.add(val))
+                    entityPrimaryKeys.get(weakEntityId).forEach(val => primaryKeys.add(val))
                     tables.push(entities.get(weakEntityId))
-                    outputEntitySql.delete(weakEntityId)
+                    entitySql.delete(weakEntityId)
                 }
 
                 tableName = tables.join("_") + "_" + relationships.get(key) + "_"
@@ -330,17 +327,16 @@ function generatePostgreSqlDdl(jsonObj) {
                 tables = []
                 for (let i = 0; i < dependentEntityIds.length; i++) {
                     let dependentEntityId = dependentEntityIds[i].id
-                    sqlLines.add(entityAttributesWithType.get(dependentEntityId))
+                    fieldWithType.add(entityAttributesWithType.get(dependentEntityId))
                     tables.push(entities.get(dependentEntityId))
-                    outputEntitySql.delete(dependentEntityId)
+                    entitySql.delete(dependentEntityId)
                 }
 
                 tableName += tables.join("_")
 
                 ddlForCurrRelationship = ("CREATE TABLE " + tableName + " (\n\t")
-                ddlForCurrRelationship += Array.from(sqlLines).join(",\n\t")
-                ddlForCurrRelationship = ddlForCurrRelationship.trim()
-                ddlForCurrRelationship = ddlForCurrRelationship.substring(0, ddlForCurrRelationship.length-1)
+                ddlForCurrRelationship += Array.from(fieldWithType).join(",\n\t")
+                ddlForCurrRelationship += "PRIMARY KEY (" + Array.from(primaryKeys).join(", ") + ")"
                 ddlForCurrRelationship += "\n)\n"
                 relationshipSql.set(key, ddlForCurrRelationship)
                 continue
@@ -393,7 +389,7 @@ function generatePostgreSqlDdl(jsonObj) {
 
     // Step 6: Join necessary sql together
     let res = ""
-    for (let [_, sql] of outputEntitySql) {
+    for (let [_, sql] of entitySql) {
         res += sql
     }
     for (let [_, sql] of relationshipSql) {
