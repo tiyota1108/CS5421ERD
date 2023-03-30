@@ -187,6 +187,7 @@ function generatePostgreSqlDdl(jsonObj) {
         let ddlForCurrEntity = ("CREATE TABLE " + entities.get(key) + " (\n")
         let currKeys = []
         let currKeysWithType = []
+        let currForeignKeys = []
 
         if (weakEntity.has(key)) {
             // Find entities that it depends on
@@ -216,9 +217,17 @@ function generatePostgreSqlDdl(jsonObj) {
 
             // If ready
             for (let i = 0; i < dependentEntities.length; i++) {
-                ddlForCurrEntity += ("\t" + entityPrimaryKeysWithType.get(dependentEntities[i].id).join(",") + ", \n");
-                currKeys.push(entityPrimaryKeys.get(dependentEntities[i].id).join(","))
-                currKeysWithType.push(entityPrimaryKeysWithType.get(dependentEntities[i].id))
+                let dependentEntityId = dependentEntities[i].id
+                let dependentEntityName = entities.get(dependentEntityId)
+                let keysWithType = entityPrimaryKeysWithType.get(dependentEntityId)
+                for (let j = 0; j < keysWithType.length; j++) {
+                    let keyName = dependentEntityName + "_" + keysWithType[j].split(" ")[0]
+                    let keyType = keysWithType[j].split(" ")[1]
+                    ddlForCurrEntity += ("\t" + keyName + " " + keyType + ", \n")
+                    currKeysWithType.push(keyName + " " + keyType)
+                    currKeys.push(keyName)
+                    currForeignKeys.push({entity: dependentEntityName, attribute: keysWithType[j].split(" ")[0], currEntityAttribute: keyName})
+                }
             }
         }
 
@@ -252,13 +261,27 @@ function generatePostgreSqlDdl(jsonObj) {
 
         entityPrimaryKeys.set(key, currKeys)
         entityPrimaryKeysWithType.set(key, currKeysWithType)
-        ddlForCurrEntity += ("\tPRIMARY KEY (" + currKeys.join(",") + ")\n)\n")
+        ddlForCurrEntity += ("\tPRIMARY KEY (" + currKeys.join(",") + ")")
+
+        if (currForeignKeys.length > 0) {
+            ddlForCurrEntity += ",\n"
+            for (let i = 0; i < currForeignKeys.length; i++) {
+                ddlForCurrEntity += ("\tCONSTRAINT fk_" + i + "_" + entities.get(key)
+                    + " FOREIGN KEY(" + currForeignKeys[i].currEntityAttribute + ")"
+                    + " REFERENCES " + currForeignKeys[i].entity + "(" + currForeignKeys[i].attribute + "), \n")
+            }
+            ddlForCurrEntity = ddlForCurrEntity.trim()
+            ddlForCurrEntity = ddlForCurrEntity.substring(0, ddlForCurrEntity.length-1)
+        }
+        ddlForCurrEntity += "\n)\n"
+
         res += ddlForCurrEntity
     }
 
     for (let [key, values] of relationshipToEntity) {
         let ddlForCurrRelationship = ("CREATE TABLE " + relationships.get(key) + " (\n")
         let currKeys = []
+        let currForeignKeys = []
 
         if (relationshipToKey.get(key) !== undefined) {
             const currRelationshipKeys = relationshipToKey.get(key)
@@ -278,7 +301,6 @@ function generatePostgreSqlDdl(jsonObj) {
                     currKeys.push(attributeName)
                 } else {
                     // Relationship key type 2: relationship -> key -> entity
-                    // TODO: it seems that the cardinality does not affect the relationship primary keys
                     ddlForCurrRelationship += ("\t" + entityPrimaryKeysWithType.get(keyToEntity.get(currRelationshipKeys[i]).id) + ", \n")
                     currKeys.push(entityPrimaryKeys.get(keyToEntity.get(currRelationshipKeys[i]).id))
                 }
@@ -289,8 +311,16 @@ function generatePostgreSqlDdl(jsonObj) {
         for (let i = 0; i < currRelationshipImplicitKeys.length; i++) {
             // Relationship key type 3: relationship -> entity
             // TODO: it seems that the cardinality does not affect the relationship primary keys
-            ddlForCurrRelationship += ("\t" + entityPrimaryKeysWithType.get(currRelationshipImplicitKeys[i].id) + ", \n")
-            currKeys.push(entityPrimaryKeys.get(currRelationshipImplicitKeys[i].id))
+            let entityId = currRelationshipImplicitKeys[i].id
+            let entityName = entities.get(entityId)
+            let keysWithType = entityPrimaryKeysWithType.get(entityId)
+            for (let j = 0; j < keysWithType.length; j++) {
+                let keyName = entityName + "_" + keysWithType[j].split(" ")[0]
+                let keyType = keysWithType[j].split(" ")[1]
+                ddlForCurrRelationship += ("\t" + keyName + " " + keyType + ", \n")
+                currKeys.push(keyName)
+                currForeignKeys.push({entity: entityName, attribute: keysWithType[j].split(" ")[0], currEntityAttribute: keyName})
+            }
         }
 
         if (relationshipToAttribute.get(key) !== undefined) {
@@ -305,7 +335,20 @@ function generatePostgreSqlDdl(jsonObj) {
             }
         }
 
-        ddlForCurrRelationship += ("\tPRIMARY KEY (" + currKeys.join(",") + ")\n)\n")
+        ddlForCurrRelationship += ("\tPRIMARY KEY (" + currKeys.join(",") + ")")
+
+        if (currForeignKeys.length > 0) {
+            ddlForCurrRelationship += ",\n"
+            for (let i = 0; i < currForeignKeys.length; i++) {
+                ddlForCurrRelationship += ("\tCONSTRAINT fk_" + i + "_" + relationships.get(key)
+                    + " FOREIGN KEY(" + currForeignKeys[i].currEntityAttribute + ")"
+                    + " REFERENCES " + currForeignKeys[i].entity + "(" + currForeignKeys[i].attribute + "), \n")
+            }
+            ddlForCurrRelationship = ddlForCurrRelationship.trim()
+            ddlForCurrRelationship = ddlForCurrRelationship.substring(0, ddlForCurrRelationship.length-1)
+        }
+        ddlForCurrRelationship += "\n)\n"
+
         res += ddlForCurrRelationship
     }
 
