@@ -582,21 +582,18 @@ var App = window.App || {};
         },
 
         generateDDL: function() {
-        var windowFeatures = 'menubar=no,location=no,resizable=yes,scrollbars=yes,status=no';
-        var windowName = _.uniqueId('ddl_output');
-        var jsonWindow = window.open('', windowName, windowFeatures);
-        const jsonObj = JSON.stringify(this.graph.toJSON());
-        if (jsonWindow) {
-
-            if (validateGraph(this.graph.toJSON())){
-                jsonWindow.document.write('<textarea rows="50" cols="100" style="resize: true;">' + generatePostgreSqlDdl(this.graph.toJSON()) + '</textarea>');
-                jsonWindow.focus();
+            var windowFeatures = 'menubar=no,location=no,resizable=yes,scrollbars=yes,status=no';
+            var windowName = _.uniqueId('ddl_output');
+            var jsonWindow = window.open('', windowName, windowFeatures);
+            if (jsonWindow) {
+                try {
+                    var result = generateSqlDdl(this.graph.toJSON(), 'mysql')
+                    jsonWindow.document.write('<textarea rows="50" cols="100" style="resize: true;">' + result + '</textarea>');
+                    jsonWindow.focus();
+                } catch (e) {
+                    jsonWindow.document.write('Error encountered when generating ddl. Details:\n', e);
+                }
             }
-            else{
-                jsonWindow.document.write('Error encountered when generating ddl, check console log for more details. JSON:',jsonObj);
-            };
-            
-        }
         },
 
         layoutDirectedGraph: function() {
