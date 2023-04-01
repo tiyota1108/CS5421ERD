@@ -203,22 +203,19 @@ function generatePostgreSqlDdl(jsonObj) {
     }
 
     // Step 4: Fill in ddl for entity
-    let entityPrimaryKeys = new Map()
-    let entityPrimaryKeysWithType = new Map()
-    let entityAttributesWithType = new Map()
     let entitySql = new Map()
+    let entityPrimaryKeysInfo = new Map() // structure: {"entity_id": set({name: "key_name", type: "key_type"})}
+    let entityAttributesInfo = new Map() // structure: {"entity_id": set({name: "attribute_name", type: "attribute_type"})}
     let entitiesQueue = Array.from(entities.keys())
     while (entitiesQueue.length !== 0) {
         const entityId = entitiesQueue[0]
         const values = entityToKey.get(entitiesQueue[0])
         entitiesQueue.shift()
+        let currPrimaryKeysInfo = []
+        let currAttributesInfo = []
+        let currForeignKeysInfo = []
 
-        let ddlForCurrEntity = ("CREATE TABLE " + entities.get(entityId) + " (\n")
-        let currKeys = []
-        let currKeysWithType = []
-        let currAttributesWithType = []
-        let currForeignKeys = []
-
+        // Step 4.1: Process weak entity & foreign keys
         if (weakEntity.has(entityId)) {
             // Find entities that it depends on
             let dependentEntities = []
@@ -235,7 +232,7 @@ function generatePostgreSqlDdl(jsonObj) {
             // Check if dependentEntities are processed
             let dependencyReady = true
             for (let i = 0; i < dependentEntities.length; i++) {
-                if (!entityPrimaryKeys.has(dependentEntities[i].id)) {
+                if (!entityPrimaryKeysInfo.has(dependentEntities[i].id)) {
                     dependencyReady = false
                     break
                 }
@@ -249,18 +246,18 @@ function generatePostgreSqlDdl(jsonObj) {
             for (let i = 0; i < dependentEntities.length; i++) {
                 let dependentEntityId = dependentEntities[i].id
                 let dependentEntityName = entities.get(dependentEntityId)
-                let keysWithType = entityPrimaryKeysWithType.get(dependentEntityId)
+                let keysWithType = entityPrimaryKeysInfo.get(dependentEntityId)
                 for (let j = 0; j < keysWithType.length; j++) {
-                    let keyName = dependentEntityName + "_" + keysWithType[j].split(" ")[0]
-                    let keyType = keysWithType[j].split(" ")[1]
-                    ddlForCurrEntity += ("\t" + keyName + " " + keyType + ", \n")
-                    currKeysWithType.push(keyName + " " + keyType)
-                    currKeys.push(keyName)
-                    currForeignKeys.push({entity: dependentEntityName, attribute: keysWithType[j].split(" ")[0], currEntityAttribute: keyName})
+                    let keyName = dependentEntityName + "_" + keysWithType[j].name
+                    let keyType = keysWithType[j].type
+                    currPrimaryKeysInfo.push({name: keyName, type: keyType})
+                    currForeignKeysInfo.push({dependentEntity: dependentEntityName, dependentAttribute: keysWithType[j].name,
+                        name: keyName, type: keyType})
                 }
             }
         }
 
+        // Step 4.2: Process keys
         const currEntityKeys = Array.from(values)
         for (let i = 0; i < currEntityKeys.length; i++) {
             if (!keyToAttribute.has(currEntityKeys[i])) {
@@ -272,11 +269,10 @@ function generatePostgreSqlDdl(jsonObj) {
             }
             let attributeName = attributes.get(keyToAttribute.get(currEntityKeys[i]).id)
             let linkWords = links.get(linkId).join(" ")
-            ddlForCurrEntity += ("\t" + attributeName + " " + linkWords + ", \n");
-            currKeys.push(attributeName)
-            currKeysWithType.push(attributeName + " " + linkWords)
+            currPrimaryKeysInfo.push({name: attributeName, type: linkWords})
         }
 
+        // Step 4.3: Process attributes
         if (entityToAttribute.get(entityId) !== undefined) {
             const currEntityAttributes = Array.from(entityToAttribute.get(entityId))
             for (let i = 0; i < currEntityAttributes.length; i++) {
@@ -285,45 +281,59 @@ function generatePostgreSqlDdl(jsonObj) {
                 }
                 let attributeName = attributes.get(currEntityAttributes[i].id)
                 let linkWords = links.get(currEntityAttributes[i].link).join(" ")
-                ddlForCurrEntity += ("\t" + attributeName + " " + linkWords + ", \n")
-                currAttributesWithType.push(attributeName + " " + linkWords)
+                currAttributesInfo.push({name: attributeName, type: linkWords})
             }
         }
 
-        entityPrimaryKeys.set(entityId, currKeys)
-        entityPrimaryKeysWithType.set(entityId, currKeysWithType)
-        entityAttributesWithType.set(entityId, currAttributesWithType)
-        ddlForCurrEntity += ("\tPRIMARY KEY (" + currKeys.join(",") + ")")
-
-        if (currForeignKeys.length > 0) {
+        // Step 4.5: Generate SQL
+        if (currPrimaryKeysInfo.length === 0) {
+            throw new Error("[Graph validation error] No primary key for entity: " + entities.get(entityId))
+        }
+        let ddlForCurrEntity = ("CREATE TABLE " + entities.get(entityId) + " (\n")
+        for (let i = 0; i < currPrimaryKeysInfo.length; i++) {
+            ddlForCurrEntity += ("\t" + currPrimaryKeysInfo[i].name + " " + currPrimaryKeysInfo[i].type + ", \n")
+        }
+        for (let i = 0; i < currAttributesInfo.length; i++) {
+            ddlForCurrEntity += ("\t" + currAttributesInfo[i].name + " " + currAttributesInfo[i].type + ", \n")
+        }
+        for (let i = 0; i < currForeignKeysInfo.length; i++) {
+            ddlForCurrEntity += ("\t" + currForeignKeysInfo[i].name + " " + currForeignKeysInfo[i].type + ", \n")
+        }
+        ddlForCurrEntity += ("\tPRIMARY KEY (" + currPrimaryKeysInfo.map(e => e.name).join(",") + ")")
+        if (currForeignKeysInfo.length > 0) {
             ddlForCurrEntity += ",\n"
-            for (let i = 0; i < currForeignKeys.length; i++) {
+            for (let i = 0; i < currForeignKeysInfo.length; i++) {
                 ddlForCurrEntity += ("\tCONSTRAINT fk_" + i + "_" + entities.get(entityId)
-                    + " FOREIGN KEY(" + currForeignKeys[i].currEntityAttribute + ")"
-                    + " REFERENCES " + currForeignKeys[i].entity + "(" + currForeignKeys[i].attribute + "), \n")
+                    + " FOREIGN KEY(" + currForeignKeysInfo[i].name + ")"
+                    + " REFERENCES " + currForeignKeysInfo[i].dependentEntity + "(" + currForeignKeysInfo[i].dependentAttribute + "), \n")
             }
             ddlForCurrEntity = ddlForCurrEntity.trim()
             ddlForCurrEntity = ddlForCurrEntity.substring(0, ddlForCurrEntity.length-1)
         }
         ddlForCurrEntity += "\n)\n"
 
+        // Step 4.6: Store for future usage
         entitySql.set(entityId, ddlForCurrEntity)
+        entityPrimaryKeysInfo.set(entityId, currPrimaryKeysInfo)
+        entityAttributesInfo.set(entityId, currAttributesInfo)
     }
 
     // Step 5: Fill in ddl for relationship
     let relationshipSql = new Map()
     for (let [key, values] of relationshipToEntity) {
-        let ddlForCurrRelationship = ("CREATE TABLE " + relationships.get(key) + " (\n")
-        let currKeys = []
-        let currForeignKeys = []
-
+        let currPrimaryKeysInfo = new Set()
+        let currForeignKeysInfo = new Set()
+        let currAttributesInfo = []
+        let optimizableEntityIds = new Set()
         let hasOwnPrimaryKey = false
-        let weakEntityIds = []
-        let oneToOneEntityIds = []
 
+        // Step 5.1: Process relationship -> key
         if (relationshipToKey.get(key) !== undefined) {
             const currRelationshipKeys = Array.from(relationshipToKey.get(key))
             for (let i = 0; i < currRelationshipKeys.length; i++) {
+                if (!keyToAttribute.has(currRelationshipKeys[i]) && !keyToEntity.has(currRelationshipKeys[i])) {
+                    throw new Error("[Graph validation error] Got relationship -> key connection unconnected with either attribute or entity")
+                }
                 if (keyToAttribute.has(currRelationshipKeys[i])) {
                     // relationship -> key -> attribute
                     hasOwnPrimaryKey = true
@@ -333,70 +343,76 @@ function generatePostgreSqlDdl(jsonObj) {
                     }
                     let attributeName = attributes.get(keyToAttribute.get(currRelationshipKeys[i]).id)
                     let linkWords = links.get(linkId).join(" ")
-                    ddlForCurrRelationship += ("\t" + attributeName + " " + linkWords + ", \n");
-                    currKeys.push(attributeName)
-                } else if (keyToEntity.has(currRelationshipKeys[i])) {
+                    currPrimaryKeysInfo.push({name: attributeName, type: linkWords})
+                }
+            }
+            for (let i = 0; i < currRelationshipKeys.length; i++) {
+                if (keyToEntity.has(currRelationshipKeys[i])) {
                     // relationship -> key -> entity
-                    weakEntityIds.push(keyToEntity.get(currRelationshipKeys[i]))
-                } else {
-                    throw new Error("[Graph validation error] Got relationship -> key connection unconnected with either attribute or entity")
+                    let entityId = keyToEntity.get(currRelationshipKeys[i])
+                    let entityName = entities.get(entityId)
+                    entityPrimaryKeysInfo.get(entityId).forEach(e => {
+                        if (!hasOwnPrimaryKey) {
+                            currPrimaryKeysInfo.add({name: e.name, type: e.type})
+                        }
+                        currForeignKeysInfo.add({dependentEntity: entityName, dependentAttribute: e.name, name: e.name, type: e.type})
+                    })
+                    optimizableEntityIds.add(keyToEntity.get(currRelationshipKeys[i]))
                 }
             }
         }
 
+        // Step 5.2: Process relationship -> entity
         const currRelationshipImplicitKeys = Array.from(values)
         for (let i = 0; i < currRelationshipImplicitKeys.length; i++) {
-            // relationship -> entity
             let entityId = currRelationshipImplicitKeys[i].id
             let linkId = currRelationshipImplicitKeys[i].link
             if (links.has(linkId) && links.get(linkId).length === 1 && links.get(linkId)[0].replaceAll(' ', '') === '(1,1)') {
-                oneToOneEntityIds.push(entityId)
+                optimizableEntityIds.add(entityId)
             }
             let entityName = entities.get(entityId)
-            let keysWithType = entityPrimaryKeysWithType.get(entityId)
-            for (let j = 0; j < keysWithType.length; j++) {
-                let keyName = entityName + "_" + keysWithType[j].split(" ")[0]
-                let keyType = keysWithType[j].split(" ")[1]
-                ddlForCurrRelationship += ("\t" + keyName + " " + keyType + ", \n")
+            let entityInfo = entityPrimaryKeysInfo.get(entityId)
+            for (let j = 0; j < entityInfo.length; j++) {
+                let keyName = entityName + "_" + entityInfo[j].name
+                let keyType = entityInfo[j].type
                 if (!hasOwnPrimaryKey) {
-                    currKeys.push(keyName)
+                    currPrimaryKeysInfo.add({name: keyName, type: keyType})
                 }
-                currForeignKeys.push({entity: entityName, attribute: keysWithType[j].split(" ")[0], currEntityAttribute: keyName})
+                currForeignKeysInfo.add({dependentEntity: entityName, dependentAttribute: entityInfo[j].name,
+                    name: keyName, type: keyType})
             }
         }
 
-        // Optimization: Relationship of cardinality 1-1 can be merged together
-        // Optimization: Relationship & weak entity can be merged together
-        if ((weakEntityIds.length !== 0 && values.size <= 1)
-            || (oneToOneEntityIds.length !== 0 && values.size - oneToOneEntityIds.length <= 1)) {
-            ddlForCurrRelationship = ""
-            let mergedEntityIds = new Set()
-            weakEntityIds.forEach(entityId => mergedEntityIds.add(entityId))
-            oneToOneEntityIds.forEach(entityId => mergedEntityIds.add(entityId))
+        // Step 5.3: Process relationship -> attribute
+        if (relationshipToAttribute.get(key) !== undefined) {
+            const currRelationshipAttributes = Array.from(relationshipToAttribute.get(key))
+            for (let i = 0; i < currRelationshipAttributes.length; i++) {
+                if (!links.has(currRelationshipAttributes[i].link) || links.get(currRelationshipAttributes[i].link) === 0) {
+                    throw new Error("[Graph validation error] Got relationship to attribute connection without data type specified")
+                }
+                let attributeName = attributes.get(currRelationshipAttributes[i].id)
+                let linkWords = links.get(currRelationshipAttributes[i].link).join(" ")
+                currAttributesInfo.push({name: attributeName, type: linkWords})
+            }
+        }
 
-            mergedEntityIds = Array.from(mergedEntityIds)
-            for (let i = 0; i < mergedEntityIds.length; i++) {
-                let mergedEntityId = mergedEntityIds[i]
-                let mergedEntitySql = entitySql.get(mergedEntityId)
-                entitySql.delete(mergedEntityId)
+        // Step 5.4: Optimization: Relationship of cardinality 1-1 or weak entity can be merged together
+        if (optimizableEntityIds.size !== 0 && values.size - optimizableEntityIds.size <= 1) {
+            let ddlForCurrRelationship = ""
+            optimizableEntityIds = Array.from(optimizableEntityIds)
+            for (let i = 0; i < optimizableEntityIds.length; i++) {
+                let entityId = optimizableEntityIds[i]
+                let mergedEntitySql = entitySql.get(entityId)
+                entitySql.delete(entityId)
                 mergedEntitySql = mergedEntitySql.replace(/^CREATE TABLE [a-zA-Z0-9_]+/,
-                    "CREATE TABLE " + entities.get(mergedEntityId) + "_" + relationships.get(key))
+                    "CREATE TABLE " + entities.get(entityId) + "_" + relationships.get(key))
 
                 if (relationshipToAttribute.get(key) !== undefined) {
                     mergedEntitySql = mergedEntitySql.trim()
                     mergedEntitySql = mergedEntitySql.substring(0, mergedEntitySql.length-1) // remove last bracket
                     mergedEntitySql = mergedEntitySql.trim()
                     mergedEntitySql += ", \n"
-                    const currRelationshipAttributes = Array.from(relationshipToAttribute.get(key))
-                    for (let i = 0; i < currRelationshipAttributes.length; i++) {
-                        if (!links.has(currRelationshipAttributes[i].link) || links.get(currRelationshipAttributes[i].link) === 0) {
-                            throw new Error("[Graph validation error] Got relationship to attribute connection without data type specified")
-                        }
-                        let attributeName = attributes.get(currRelationshipAttributes[i].id)
-                        let linkWords = links.get(currRelationshipAttributes[i].link).join(" ")
-                        mergedEntitySql += "\t" + attributeName + " " + linkWords + ", \n"
-                    }
-                    mergedEntitySql = mergedEntitySql.trim()
+                    mergedEntitySql += currAttributesInfo.map(e => "\t" + e.name + " " + e.type).join(", \n")
                     mergedEntitySql = mergedEntitySql.substring(0, mergedEntitySql.length-1) // remove last comma
                     mergedEntitySql += "\n)\n"
                 }
@@ -406,32 +422,33 @@ function generatePostgreSqlDdl(jsonObj) {
             continue
         }
 
-        if (relationshipToAttribute.get(key) !== undefined) {
-            const currRelationshipAttributes = Array.from(relationshipToAttribute.get(key))
-            for (let i = 0; i < currRelationshipAttributes.length; i++) {
-                if (!links.has(currRelationshipAttributes[i].link) || links.get(currRelationshipAttributes[i].link) === 0) {
-                    throw new Error("[Graph validation error] Got relationship to attribute connection without data type specified")
-                }
-                let attributeName = attributes.get(currRelationshipAttributes[i].id)
-                let linkWords = links.get(currRelationshipAttributes[i].link).join(" ")
-                ddlForCurrRelationship += ("\t" + attributeName + " " + linkWords + ", \n")
-            }
+        // Step 5.5: Generate sql
+        currPrimaryKeysInfo = Array.from(currPrimaryKeysInfo)
+        currForeignKeysInfo = Array.from(currForeignKeysInfo)
+        if (currPrimaryKeysInfo.length === 0) {
+            throw new Error("[Graph validation error] No primary key for relationship: " + relationships.get(key))
         }
-
-        ddlForCurrRelationship += ("\tPRIMARY KEY (" + currKeys.join(",") + ")")
-
-        if (currForeignKeys.length > 0) {
+        let ddlForCurrRelationship = ("CREATE TABLE " + relationships.get(key) + " (\n")
+        for (let i = 0; i < currPrimaryKeysInfo.length; i++) {
+            ddlForCurrRelationship += ("\t" + currPrimaryKeysInfo[i].name + " " + currPrimaryKeysInfo[i].type + ", \n")
+        }
+        for (let i = 0; i < currAttributesInfo.length; i++) {
+            ddlForCurrRelationship += ("\t" + currAttributesInfo[i].name + " " + currAttributesInfo[i].type + ", \n")
+        }
+        ddlForCurrRelationship += ("\tPRIMARY KEY (" + currPrimaryKeysInfo.map(e => e.name).join(",") + ")")
+        if (currForeignKeysInfo.length > 0) {
             ddlForCurrRelationship += ",\n"
-            for (let i = 0; i < currForeignKeys.length; i++) {
+            for (let i = 0; i < currForeignKeysInfo.length; i++) {
                 ddlForCurrRelationship += ("\tCONSTRAINT fk_" + i + "_" + relationships.get(key)
-                    + " FOREIGN KEY(" + currForeignKeys[i].currEntityAttribute + ")"
-                    + " REFERENCES " + currForeignKeys[i].entity + "(" + currForeignKeys[i].attribute + "), \n")
+                    + " FOREIGN KEY(" + currForeignKeysInfo[i].name + ")"
+                    + " REFERENCES " + currForeignKeysInfo[i].dependentEntity + "(" + currForeignKeysInfo[i].dependentAttribute + "), \n")
             }
             ddlForCurrRelationship = ddlForCurrRelationship.trim()
             ddlForCurrRelationship = ddlForCurrRelationship.substring(0, ddlForCurrRelationship.length-1)
         }
         ddlForCurrRelationship += "\n)\n"
 
+        // Step 5.6: Store for future usage
         relationshipSql.set(key, ddlForCurrRelationship)
     }
 
