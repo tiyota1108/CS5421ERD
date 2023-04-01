@@ -207,23 +207,23 @@ function generatePostgreSqlDdl(jsonObj) {
     let entityPrimaryKeysWithType = new Map()
     let entityAttributesWithType = new Map()
     let entitySql = new Map()
-    let entitiesQueue = Array.from(entityToKey.keys())
+    let entitiesQueue = Array.from(entities.keys())
     while (entitiesQueue.length !== 0) {
-        const key = entitiesQueue[0]
+        const entityId = entitiesQueue[0]
         const values = entityToKey.get(entitiesQueue[0])
         entitiesQueue.shift()
 
-        let ddlForCurrEntity = ("CREATE TABLE " + entities.get(key) + " (\n")
+        let ddlForCurrEntity = ("CREATE TABLE " + entities.get(entityId) + " (\n")
         let currKeys = []
         let currKeysWithType = []
         let currAttributesWithType = []
         let currForeignKeys = []
 
-        if (weakEntity.has(key)) {
+        if (weakEntity.has(entityId)) {
             // Find entities that it depends on
             let dependentEntities = []
-            for (let [keyId, entityId] of keyToEntity) {
-                if (entityId === key) {
+            for (let [keyId, keyToEntityId] of keyToEntity) {
+                if (keyToEntityId === entityId) {
                     for (let [relationshipId, keyIds] of relationshipToKey) {
                         if (keyIds.has(keyId)) {
                             dependentEntities = Array.from(relationshipToEntity.get(relationshipId))
@@ -241,7 +241,7 @@ function generatePostgreSqlDdl(jsonObj) {
                 }
             }
             if (!dependencyReady) {
-                entitiesQueue.push(key)
+                entitiesQueue.push(entityId)
                 continue
             }
 
@@ -277,8 +277,8 @@ function generatePostgreSqlDdl(jsonObj) {
             currKeysWithType.push(attributeName + " " + linkWords)
         }
 
-        if (entityToAttribute.get(key) !== undefined) {
-            const currEntityAttributes = Array.from(entityToAttribute.get(key))
+        if (entityToAttribute.get(entityId) !== undefined) {
+            const currEntityAttributes = Array.from(entityToAttribute.get(entityId))
             for (let i = 0; i < currEntityAttributes.length; i++) {
                 if (!links.has(currEntityAttributes[i].link) || links.get(currEntityAttributes[i].link).length === 0) {
                     throw new Error("[Graph validation error] Got entity to attribute connection without data type specified")
@@ -290,15 +290,15 @@ function generatePostgreSqlDdl(jsonObj) {
             }
         }
 
-        entityPrimaryKeys.set(key, currKeys)
-        entityPrimaryKeysWithType.set(key, currKeysWithType)
-        entityAttributesWithType.set(key, currAttributesWithType)
+        entityPrimaryKeys.set(entityId, currKeys)
+        entityPrimaryKeysWithType.set(entityId, currKeysWithType)
+        entityAttributesWithType.set(entityId, currAttributesWithType)
         ddlForCurrEntity += ("\tPRIMARY KEY (" + currKeys.join(",") + ")")
 
         if (currForeignKeys.length > 0) {
             ddlForCurrEntity += ",\n"
             for (let i = 0; i < currForeignKeys.length; i++) {
-                ddlForCurrEntity += ("\tCONSTRAINT fk_" + i + "_" + entities.get(key)
+                ddlForCurrEntity += ("\tCONSTRAINT fk_" + i + "_" + entities.get(entityId)
                     + " FOREIGN KEY(" + currForeignKeys[i].currEntityAttribute + ")"
                     + " REFERENCES " + currForeignKeys[i].entity + "(" + currForeignKeys[i].attribute + "), \n")
             }
@@ -307,11 +307,10 @@ function generatePostgreSqlDdl(jsonObj) {
         }
         ddlForCurrEntity += "\n)\n"
 
-        entitySql.set(key, ddlForCurrEntity)
+        entitySql.set(entityId, ddlForCurrEntity)
     }
 
     // Step 5: Fill in ddl for relationship
-    // TODO: Test case for unary
     let relationshipSql = new Map()
     for (let [key, values] of relationshipToEntity) {
         let ddlForCurrRelationship = ("CREATE TABLE " + relationships.get(key) + " (\n")
