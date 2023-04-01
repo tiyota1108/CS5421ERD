@@ -2231,150 +2231,150 @@ App.config = App.config || {};
                 }
             }
         },
-        'erd.WeakEntity': {
-            inputs: {
-                attrs: {
-                    text: {
-                        text: {
-                            type: 'content-editable',
-                            label: 'Text',
-                            group: 'text',
-                            index: 1
-                        },
-                        'font-size': {
-                            type: 'range',
-                            min: 5,
-                            max: 80,
-                            unit: 'px',
-                            label: 'Font size',
-                            group: 'text',
-                            when: { ne: { 'attrs/text/text': '' }},
-                            index: 2
-                        },
-                        'font-family': {
-                            type: 'select-box',
-                            options: options.fontFamily,
-                            label: 'Font family',
-                            group: 'text',
-                            when: { ne: { 'attrs/text/text': '' }},
-                            index: 3
-                        },
-                        'font-weight': {
-                            type: 'select-box',
-                            options: options.fontWeight,
-                            label: 'Font thickness',
-                            group: 'text',
-                            when: { ne: { 'attrs/text/text': '' }},
-                            index: 4
-                        },
-                        fill: {
-                            type: 'color-palette',
-                            options: options.colorPalette,
-                            label: 'Fill',
-                            group: 'text',
-                            when: { ne: { 'attrs/text/text': '' }},
-                            index: 5
-                        }
-                    },
-                    '.outer': {
-                        fill: {
-                            type: 'color-palette',
-                            options: options.colorPalette,
-                            label: 'Fill',
-                            group: 'outer',
-                            index: 1
-                        },
-                        stroke: {
-                            type: 'color-palette',
-                            options: options.colorPalette,
-                            label: 'Outline',
-                            group: 'outer',
-                            index: 2
-                        },
-                        'stroke-width': {
-                            type: 'range',
-                            min: 0,
-                            max: 30,
-                            step: 1,
-                            defaultValue: 1,
-                            unit: 'px',
-                            label: 'Outline thickness',
-                            group: 'outer',
-                            when: { ne: { 'attrs/.outer/stroke': 'transparent' }},
-                            index: 3
-                        },
-                        'stroke-dasharray': {
-                            type: 'select-box',
-                            options: options.strokeStyle,
-                            label: 'Outline style',
-                            group: 'outer',
-                            when: {
-                                and: [
-                                    { ne: { 'attrs/.outer/stroke': 'transparent' }},
-                                    { ne: { 'attrs/.outer/stroke-width': 0 }}
-                                ]
-                            },
-                            index: 4
-                        }
-                    },
-                    '.inner': {
-                        fill: {
-                            type: 'color-palette',
-                            options: options.colorPalette,
-                            label: 'Fill',
-                            group: 'inner',
-                            index: 1
-                        },
-                        stroke: {
-                            type: 'color-palette',
-                            options: options.colorPalette,
-                            label: 'Outline',
-                            group: 'inner',
-                            index: 2
-                        },
-                        'stroke-width': {
-                            type: 'range',
-                            min: 0,
-                            max: 30,
-                            step: 1,
-                            defaultValue: 1,
-                            unit: 'px',
-                            label: 'Outline thickness',
-                            group: 'inner',
-                            when: { ne: { 'attrs/.inner/stroke': 'transparent' }},
-                            index: 3
-                        },
-                        'stroke-dasharray': {
-                            type: 'select-box',
-                            options: options.strokeStyle,
-                            label: 'Outline style',
-                            group: 'inner',
-                            when: {
-                                and: [
-                                    { ne: { 'attrs/.inner/stroke': 'transparent' }},
-                                    { ne: { 'attrs/.inner/stroke-width': 0 }}
-                                ]
-                            },
-                            index: 4
-                        }
-                    }
-                }
-            },
-            groups: {
-                text: {
-                    label: 'Text',
-                    index: 1
-                },
-                outer: {
-                    label: 'Outer rectangle',
-                    index: 2
-                },
-                inner: {
-                    label: 'Inner rectangle',
-                    index: 3
-                }
-            }
-        },
+        // 'erd.WeakEntity': {
+        //     inputs: {
+        //         attrs: {
+        //             text: {
+        //                 text: {
+        //                     type: 'content-editable',
+        //                     label: 'Text',
+        //                     group: 'text',
+        //                     index: 1
+        //                 },
+        //                 'font-size': {
+        //                     type: 'range',
+        //                     min: 5,
+        //                     max: 80,
+        //                     unit: 'px',
+        //                     label: 'Font size',
+        //                     group: 'text',
+        //                     when: { ne: { 'attrs/text/text': '' }},
+        //                     index: 2
+        //                 },
+        //                 'font-family': {
+        //                     type: 'select-box',
+        //                     options: options.fontFamily,
+        //                     label: 'Font family',
+        //                     group: 'text',
+        //                     when: { ne: { 'attrs/text/text': '' }},
+        //                     index: 3
+        //                 },
+        //                 'font-weight': {
+        //                     type: 'select-box',
+        //                     options: options.fontWeight,
+        //                     label: 'Font thickness',
+        //                     group: 'text',
+        //                     when: { ne: { 'attrs/text/text': '' }},
+        //                     index: 4
+        //                 },
+        //                 fill: {
+        //                     type: 'color-palette',
+        //                     options: options.colorPalette,
+        //                     label: 'Fill',
+        //                     group: 'text',
+        //                     when: { ne: { 'attrs/text/text': '' }},
+        //                     index: 5
+        //                 }
+        //             },
+        //             '.outer': {
+        //                 fill: {
+        //                     type: 'color-palette',
+        //                     options: options.colorPalette,
+        //                     label: 'Fill',
+        //                     group: 'outer',
+        //                     index: 1
+        //                 },
+        //                 stroke: {
+        //                     type: 'color-palette',
+        //                     options: options.colorPalette,
+        //                     label: 'Outline',
+        //                     group: 'outer',
+        //                     index: 2
+        //                 },
+        //                 'stroke-width': {
+        //                     type: 'range',
+        //                     min: 0,
+        //                     max: 30,
+        //                     step: 1,
+        //                     defaultValue: 1,
+        //                     unit: 'px',
+        //                     label: 'Outline thickness',
+        //                     group: 'outer',
+        //                     when: { ne: { 'attrs/.outer/stroke': 'transparent' }},
+        //                     index: 3
+        //                 },
+        //                 'stroke-dasharray': {
+        //                     type: 'select-box',
+        //                     options: options.strokeStyle,
+        //                     label: 'Outline style',
+        //                     group: 'outer',
+        //                     when: {
+        //                         and: [
+        //                             { ne: { 'attrs/.outer/stroke': 'transparent' }},
+        //                             { ne: { 'attrs/.outer/stroke-width': 0 }}
+        //                         ]
+        //                     },
+        //                     index: 4
+        //                 }
+        //             },
+        //             '.inner': {
+        //                 fill: {
+        //                     type: 'color-palette',
+        //                     options: options.colorPalette,
+        //                     label: 'Fill',
+        //                     group: 'inner',
+        //                     index: 1
+        //                 },
+        //                 stroke: {
+        //                     type: 'color-palette',
+        //                     options: options.colorPalette,
+        //                     label: 'Outline',
+        //                     group: 'inner',
+        //                     index: 2
+        //                 },
+        //                 'stroke-width': {
+        //                     type: 'range',
+        //                     min: 0,
+        //                     max: 30,
+        //                     step: 1,
+        //                     defaultValue: 1,
+        //                     unit: 'px',
+        //                     label: 'Outline thickness',
+        //                     group: 'inner',
+        //                     when: { ne: { 'attrs/.inner/stroke': 'transparent' }},
+        //                     index: 3
+        //                 },
+        //                 'stroke-dasharray': {
+        //                     type: 'select-box',
+        //                     options: options.strokeStyle,
+        //                     label: 'Outline style',
+        //                     group: 'inner',
+        //                     when: {
+        //                         and: [
+        //                             { ne: { 'attrs/.inner/stroke': 'transparent' }},
+        //                             { ne: { 'attrs/.inner/stroke-width': 0 }}
+        //                         ]
+        //                     },
+        //                     index: 4
+        //                 }
+        //             }
+        //         }
+        //     },
+        //     groups: {
+        //         text: {
+        //             label: 'Text',
+        //             index: 1
+        //         },
+        //         outer: {
+        //             label: 'Outer rectangle',
+        //             index: 2
+        //         },
+        //         inner: {
+        //             label: 'Inner rectangle',
+        //             index: 3
+        //         }
+        //     }
+        // },
         'erd.Relationship': {
             inputs: {
                 attrs: {
@@ -2474,150 +2474,150 @@ App.config = App.config || {};
                 }
             }
         },
-        'erd.IdentifyingRelationship': {
-            inputs: {
-                attrs: {
-                    text: {
-                        text: {
-                            type: 'content-editable',
-                            label: 'Text',
-                            group: 'text',
-                            index: 1
-                        },
-                        'font-size': {
-                            type: 'range',
-                            min: 5,
-                            max: 80,
-                            unit: 'px',
-                            label: 'Font size',
-                            group: 'text',
-                            when: { ne: { 'attrs/text/text': '' }},
-                            index: 2
-                        },
-                        'font-family': {
-                            type: 'select-box',
-                            options: options.fontFamily,
-                            label: 'Font family',
-                            group: 'text',
-                            when: { ne: { 'attrs/text/text': '' }},
-                            index: 3
-                        },
-                        'font-weight': {
-                            type: 'select-box',
-                            options: options.fontWeight,
-                            label: 'Font thickness',
-                            group: 'text',
-                            when: { ne: { 'attrs/text/text': '' }},
-                            index: 4
-                        },
-                        fill: {
-                            type: 'color-palette',
-                            options: options.colorPalette,
-                            label: 'Fill',
-                            group: 'text',
-                            when: { ne: { 'attrs/text/text': '' }},
-                            index: 5
-                        }
-                    },
-                    '.outer': {
-                        fill: {
-                            type: 'color-palette',
-                            options: options.colorPalette,
-                            label: 'Fill',
-                            group: 'outer',
-                            index: 1
-                        },
-                        stroke: {
-                            type: 'color-palette',
-                            options: options.colorPalette,
-                            label: 'Outline',
-                            group: 'outer',
-                            index: 2
-                        },
-                        'stroke-width': {
-                            type: 'range',
-                            min: 0,
-                            max: 30,
-                            step: 1,
-                            defaultValue: 1,
-                            unit: 'px',
-                            label: 'Outline thickness',
-                            group: 'outer',
-                            when: { ne: { 'attrs/.outer/stroke': 'transparent' }},
-                            index: 3
-                        },
-                        'stroke-dasharray': {
-                            type: 'select-box',
-                            options: options.strokeStyle,
-                            label: 'Outline style',
-                            group: 'outer',
-                            when: {
-                                and: [
-                                    { ne: { 'attrs/.outer/stroke': 'transparent' }},
-                                    { ne: { 'attrs/.outer/stroke-width': 0 }}
-                                ]
-                            },
-                            index: 4
-                        }
-                    },
-                    '.inner': {
-                        fill: {
-                            type: 'color-palette',
-                            options: options.colorPalette,
-                            label: 'Fill',
-                            group: 'inner',
-                            index: 1
-                        },
-                        stroke: {
-                            type: 'color-palette',
-                            options: options.colorPalette,
-                            label: 'Outline',
-                            group: 'inner',
-                            index: 2
-                        },
-                        'stroke-width': {
-                            type: 'range',
-                            min: 0,
-                            max: 30,
-                            step: 1,
-                            defaultValue: 1,
-                            unit: 'px',
-                            label: 'Outline thickness',
-                            group: 'inner',
-                            when: { ne: { 'attrs/.inner/stroke': 'transparent' }},
-                            index: 3
-                        },
-                        'stroke-dasharray': {
-                            type: 'select-box',
-                            options: options.strokeStyle,
-                            label: 'Outline style',
-                            group: 'inner',
-                            when: {
-                                and: [
-                                    { ne: { 'attrs/.inner/stroke': 'transparent' }},
-                                    { ne: { 'attrs/.inner/stroke-width': 0 }}
-                                ]
-                            },
-                            index: 4
-                        }
-                    }
-                }
-            },
-            groups: {
-                text: {
-                    label: 'Text',
-                    index: 1
-                },
-                outer: {
-                    label: 'Outer polygon',
-                    index: 2
-                },
-                inner: {
-                    label: 'Inner polygon',
-                    index: 3
-                }
-            }
-        },
+        // 'erd.IdentifyingRelationship': {
+        //     inputs: {
+        //         attrs: {
+        //             text: {
+        //                 text: {
+        //                     type: 'content-editable',
+        //                     label: 'Text',
+        //                     group: 'text',
+        //                     index: 1
+        //                 },
+        //                 'font-size': {
+        //                     type: 'range',
+        //                     min: 5,
+        //                     max: 80,
+        //                     unit: 'px',
+        //                     label: 'Font size',
+        //                     group: 'text',
+        //                     when: { ne: { 'attrs/text/text': '' }},
+        //                     index: 2
+        //                 },
+        //                 'font-family': {
+        //                     type: 'select-box',
+        //                     options: options.fontFamily,
+        //                     label: 'Font family',
+        //                     group: 'text',
+        //                     when: { ne: { 'attrs/text/text': '' }},
+        //                     index: 3
+        //                 },
+        //                 'font-weight': {
+        //                     type: 'select-box',
+        //                     options: options.fontWeight,
+        //                     label: 'Font thickness',
+        //                     group: 'text',
+        //                     when: { ne: { 'attrs/text/text': '' }},
+        //                     index: 4
+        //                 },
+        //                 fill: {
+        //                     type: 'color-palette',
+        //                     options: options.colorPalette,
+        //                     label: 'Fill',
+        //                     group: 'text',
+        //                     when: { ne: { 'attrs/text/text': '' }},
+        //                     index: 5
+        //                 }
+        //             },
+        //             '.outer': {
+        //                 fill: {
+        //                     type: 'color-palette',
+        //                     options: options.colorPalette,
+        //                     label: 'Fill',
+        //                     group: 'outer',
+        //                     index: 1
+        //                 },
+        //                 stroke: {
+        //                     type: 'color-palette',
+        //                     options: options.colorPalette,
+        //                     label: 'Outline',
+        //                     group: 'outer',
+        //                     index: 2
+        //                 },
+        //                 'stroke-width': {
+        //                     type: 'range',
+        //                     min: 0,
+        //                     max: 30,
+        //                     step: 1,
+        //                     defaultValue: 1,
+        //                     unit: 'px',
+        //                     label: 'Outline thickness',
+        //                     group: 'outer',
+        //                     when: { ne: { 'attrs/.outer/stroke': 'transparent' }},
+        //                     index: 3
+        //                 },
+        //                 'stroke-dasharray': {
+        //                     type: 'select-box',
+        //                     options: options.strokeStyle,
+        //                     label: 'Outline style',
+        //                     group: 'outer',
+        //                     when: {
+        //                         and: [
+        //                             { ne: { 'attrs/.outer/stroke': 'transparent' }},
+        //                             { ne: { 'attrs/.outer/stroke-width': 0 }}
+        //                         ]
+        //                     },
+        //                     index: 4
+        //                 }
+        //             },
+        //             '.inner': {
+        //                 fill: {
+        //                     type: 'color-palette',
+        //                     options: options.colorPalette,
+        //                     label: 'Fill',
+        //                     group: 'inner',
+        //                     index: 1
+        //                 },
+        //                 stroke: {
+        //                     type: 'color-palette',
+        //                     options: options.colorPalette,
+        //                     label: 'Outline',
+        //                     group: 'inner',
+        //                     index: 2
+        //                 },
+        //                 'stroke-width': {
+        //                     type: 'range',
+        //                     min: 0,
+        //                     max: 30,
+        //                     step: 1,
+        //                     defaultValue: 1,
+        //                     unit: 'px',
+        //                     label: 'Outline thickness',
+        //                     group: 'inner',
+        //                     when: { ne: { 'attrs/.inner/stroke': 'transparent' }},
+        //                     index: 3
+        //                 },
+        //                 'stroke-dasharray': {
+        //                     type: 'select-box',
+        //                     options: options.strokeStyle,
+        //                     label: 'Outline style',
+        //                     group: 'inner',
+        //                     when: {
+        //                         and: [
+        //                             { ne: { 'attrs/.inner/stroke': 'transparent' }},
+        //                             { ne: { 'attrs/.inner/stroke-width': 0 }}
+        //                         ]
+        //                     },
+        //                     index: 4
+        //                 }
+        //             }
+        //         }
+        //     },
+        //     groups: {
+        //         text: {
+        //             label: 'Text',
+        //             index: 1
+        //         },
+        //         outer: {
+        //             label: 'Outer polygon',
+        //             index: 2
+        //         },
+        //         inner: {
+        //             label: 'Inner polygon',
+        //             index: 3
+        //         }
+        //     }
+        // },
         'erd.Key': {
             inputs: {
                 attrs: {
@@ -2806,47 +2806,47 @@ App.config = App.config || {};
                             index: 5
                         }
                     },
-                    '.textlabel': {
-                        text: {
-                            type: 'content-editable',
-                            label: 'Datatype',
-                            group: 'text',
-                            index: 1
-                        },
-                        'font-size': {
-                            type: 'range',
-                            min: 5,
-                            max: 80,
-                            unit: 'px',
-                            label: 'Font size datatype',
-                            group: 'text',
-                            when: { ne: { 'attrs/.textlabel/text': '' }},
-                            index: 2
-                        },
-                        'font-family': {
-                            type: 'select-box',
-                            options: options.fontFamily,
-                            label: 'Font family datatype',
-                            group: 'text',
-                            index: 3
-                        },
-                        'font-weight': {
-                            type: 'select-box',
-                            options: options.fontWeight,
-                            label: 'Font thickness datatype',
-                            group: 'text',
-                            when: { ne: { 'attrs/.textlabel/text': '' }},
-                            index: 4
-                        },
-                        fill: {
-                            type: 'color-palette',
-                            options: options.colorPalette,
-                            label: 'Fill datatype',
-                            group: 'text',
-                            when: { ne: { 'attrs/.textlabel/text': '' }},
-                            index: 5
-                        }
-                    },
+                    // '.textlabel': {
+                    //     text: {
+                    //         type: 'content-editable',
+                    //         label: 'Datatype',
+                    //         group: 'text',
+                    //         index: 1
+                    //     },
+                    //     'font-size': {
+                    //         type: 'range',
+                    //         min: 5,
+                    //         max: 80,
+                    //         unit: 'px',
+                    //         label: 'Font size datatype',
+                    //         group: 'text',
+                    //         when: { ne: { 'attrs/.textlabel/text': '' }},
+                    //         index: 2
+                    //     },
+                    //     'font-family': {
+                    //         type: 'select-box',
+                    //         options: options.fontFamily,
+                    //         label: 'Font family datatype',
+                    //         group: 'text',
+                    //         index: 3
+                    //     },
+                    //     'font-weight': {
+                    //         type: 'select-box',
+                    //         options: options.fontWeight,
+                    //         label: 'Font thickness datatype',
+                    //         group: 'text',
+                    //         when: { ne: { 'attrs/.textlabel/text': '' }},
+                    //         index: 4
+                    //     },
+                    //     fill: {
+                    //         type: 'color-palette',
+                    //         options: options.colorPalette,
+                    //         label: 'Fill datatype',
+                    //         group: 'text',
+                    //         when: { ne: { 'attrs/.textlabel/text': '' }},
+                    //         index: 5
+                    //     }
+                    // },
                     '.outer': {
                         fill: {
                             type: 'color-palette',
@@ -2898,11 +2898,12 @@ App.config = App.config || {};
                 text: {
                     label: 'Text',
                     index: 2
-                },
-                textlabel:{
-                    label: 'Datatype',
-                    index: 3
                 }
+                // ,
+                // textlabel:{
+                //     label: 'Datatype',
+                //     index: 3
+                // }
             }
         },
         'erd.Multivalued': {
