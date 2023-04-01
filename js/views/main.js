@@ -510,7 +510,7 @@ var App = window.App || {};
                 'clear:pointerclick': this.graph.clear.bind(this.graph),
                 'print:pointerclick': this.paper.print.bind(this.paper),
                 'generateddl:pointerclick': this.generateDDL.bind(this),
-                'generateprestoddl:pointerclick': this.generateprestoDDL.bind(this),
+                'generatepostgreddl:pointerclick': this.generatepostgreDDL.bind(this),
                 'grid-size:change': this.paper.setGridSize.bind(this.paper)
             });
 
@@ -599,7 +599,7 @@ var App = window.App || {};
            
         },
 
-        generateprestoDDL: function() {
+        generatepostgreDDL: function() {
             try {
                     var result = generatePostgreSqlDdl(this.graph.toJSON(), 'mysql')
                 } catch (e) {
@@ -609,7 +609,7 @@ var App = window.App || {};
                 width: 700,
                 draggable: true,
                 type: 'alert',
-                title: 'PrestoSql DDL',
+                title: 'PostgreSql DDL',
                 content: '<textarea rows="30" cols="80" style="resize: true;">' + result + '</textarea>'
             });
             dialog.open();

@@ -99,13 +99,13 @@ App.config = App.config || {};
             },
             {
                 type: 'button',
-                name: 'generateprestoddl',
+                name: 'generatepostgreddl',
                 group: 'export',
-                text: 'Generate DDL(presto)',
+                text: 'Generate DDL(postgre)',
                 attrs: {
                     button: {
                         id: 'btn-ddl',
-                        'data-tooltip': 'Generate Presto DDL in a pop-up',
+                        'data-tooltip': 'Generate PostgreSql DDL in a pop-up',
                         'data-tooltip-position': 'top',
                         'data-tooltip-position-selector': '.toolbar-container'
                     }
