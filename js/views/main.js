@@ -583,33 +583,37 @@ var App = window.App || {};
         },
 
         generateDDL: function() {
-            var windowFeatures = 'menubar=no,location=no,resizable=yes,scrollbars=yes,status=no';
-            var windowName = _.uniqueId('ddl_output');
-            var jsonWindow = window.open('', windowName, windowFeatures);
-            if (jsonWindow) {
-                try {
+            try {
                     var result = generateSqlDdl(this.graph.toJSON(), 'mysql')
-                    jsonWindow.document.write('<textarea rows="50" cols="100" style="resize: true;">' + result + '</textarea>');
-                    jsonWindow.focus();
                 } catch (e) {
-                    jsonWindow.document.write('Error encountered when generating ddl. Details:\n', e);
+                    var result = 'Error encountered when generating ddl. Details:\n' + e
                 }
-            }
+            var dialog = new joint.ui.Dialog({
+                width: 700,
+                draggable: true,
+                type: 'success',
+                title: 'MySql DDL',
+                content: '<textarea rows="30" cols="80" style="resize: true;">' + result + '</textarea>'
+            });
+            dialog.open();
+           
         },
 
         generateprestoDDL: function() {
-            var windowFeatures = 'menubar=no,location=no,resizable=yes,scrollbars=yes,status=no';
-            var windowName = _.uniqueId('ddl_output');
-            var jsonWindow = window.open('', windowName, windowFeatures);
-            if (jsonWindow) {
-                try {
+            try {
                     var result = generatePostgreSqlDdl(this.graph.toJSON(), 'mysql')
-                    jsonWindow.document.write('<textarea rows="50" cols="100" style="resize: true;">' + result + '</textarea>');
-                    jsonWindow.focus();
                 } catch (e) {
-                    jsonWindow.document.write('Error encountered when generating ddl. Details:\n', e);
+                    var result = 'Error encountered when generating ddl. Details:\n' + e
                 }
-            }
+            var dialog = new joint.ui.Dialog({
+                width: 700,
+                draggable: true,
+                type: 'alert',
+                title: 'PrestoSql DDL',
+                content: '<textarea rows="30" cols="80" style="resize: true;">' + result + '</textarea>'
+            });
+            dialog.open();
+           
         },
 
         layoutDirectedGraph: function() {
