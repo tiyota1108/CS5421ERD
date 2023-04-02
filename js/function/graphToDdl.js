@@ -416,7 +416,6 @@ function generatePostgreSqlDdl(jsonObj) {
                     mergedEntitySql = mergedEntitySql.trim()
                     mergedEntitySql += ", \n"
                     mergedEntitySql += currAttributesInfo.map(e => "\t" + e.name + " " + e.type).join(", \n")
-                    mergedEntitySql = mergedEntitySql.substring(0, mergedEntitySql.length-1) // remove last comma
                     mergedEntitySql += "\n)\n"
                 }
                 ddlForCurrRelationship += mergedEntitySql
